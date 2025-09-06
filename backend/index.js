@@ -4,51 +4,41 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import chatbotRoutes from './routes/chatbot.route.js';
 import path from "path";
+import { fileURLToPath } from "url";
 
-const app = express()
+const app = express();
 dotenv.config();
 
+const port = process.env.PORT || 3000;
 
-const port =process.env.PORT || 3000
-
-//middleware
+// Middleware
 app.use(express.json());
 app.use(cors({
-  origin: "https://ai-chat-app-tfn0.onrender.com", // only deployed frontend
+  origin: process.env.CLIENT_URL || "http://localhost:5173", // add your frontend domain here
   credentials: true
 }));
 
-
-//Database connection code 
+// Database connection
 mongoose.connect(process.env.MONGO_URI)
-.then(() => {
-  console.log("connected to mongodb")
-}).catch((error) => {
-    console.log("error connecting to mongodb:", error)
-})
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((error) => console.log("❌ Error connecting to MongoDB:", error));
 
+// API Routes
+app.use('/bot/v1', chatbotRoutes);
 
-//Defining Routes
-app.use('/bot/v1/', chatbotRoutes)
+// Deployment setup (only if serving frontend from backend)
+if (process.env.NODE_ENV === "production") {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
 
-//............... code for deployment .....................
-// ...existing code...
-if (process.env.NODE_ENV === 'production') {
-  const dirpath = path.resolve();
+  app.use(express.static(path.join(__dirname, "frontend", "dist")));
 
-  app.use(express.static(path.join(dirpath, "frontend", "dist")));
-
-  // Use a regex for the catch-all route
   app.get(/^\/(?!bot\/v1\/).*/, (req, res) => {
-    res.sendFile(path.join(dirpath, "frontend", "dist", "index.html"));
+    res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
   });
 }
-// ...existing code...
 
-
-
+// Start server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`)
-})
-
-
+  console.log(`🚀 Server running on port ${port}`);
+});
