@@ -13,7 +13,10 @@ const port =process.env.PORT || 3000
 
 //middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: "https://ai-chat-app-tfn0.onrender.com", // only deployed frontend
+  credentials: true
+}));
 
 
 //Database connection code 
