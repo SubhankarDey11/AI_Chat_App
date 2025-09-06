@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import chatbotRoutes from './routes/chatbot.route.js';
+import path from "path";
 
 const app = express()
 dotenv.config();
@@ -26,6 +27,20 @@ mongoose.connect(process.env.MONGO_URI)
 
 //Defining Routes
 app.use('/bot/v1/', chatbotRoutes)
+
+//............... code for deployment .....................
+// ...existing code...
+if (process.env.NODE_ENV === 'production') {
+  const dirpath = path.resolve();
+
+  app.use(express.static(path.join(dirpath, "frontend", "dist")));
+
+  // Use a regex for the catch-all route
+  app.get(/^\/(?!bot\/v1\/).*/, (req, res) => {
+    res.sendFile(path.join(dirpath, "frontend", "dist", "index.html"));
+  });
+}
+// ...existing code...
 
 
 
