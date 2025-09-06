@@ -16,7 +16,7 @@ function Bot() {
         setLoading(true);
         if(!input.trim()) return;
         try {
-           const res=await axios.post("http://localhost:4002/bot/v1/message",{
+           const res=await axios.post("https://ai-chat-app-tfn0.onrender.com",{
                 text: input
             })
             if(res.status === 200) {
